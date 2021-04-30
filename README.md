@@ -7,6 +7,8 @@ Stitchboard is a web-based vector graphic art application built with Fabric.js.
 
 *This was a project created for my Computer Graphics course at Grand Valley State University Winter 2021.*
 
+*Please note, this was only tested in the chromium version of Microsoft Edge, so your results/compatability may vary.
+
 ## Tools
 We'll start with the toolbar on the left side of the screen. At present, Stitchboard has five main tools artists can use at their disposal to create graphics:
 
