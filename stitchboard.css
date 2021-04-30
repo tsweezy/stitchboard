@@ -1,0 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300;1,300&display=swap');
+
+body {
+    background-color: #ddd;
+    font-family: 'Rubik', sans-serif;
+}
+
+table {
+    line-height: 0;
+}
+
+h6 {
+    letter-spacing: 1pt;
+}
+
+input[type=radio] {
+    width: 1em;
+    height: 1em;
+    margin: 0;
+    padding: 0;
+}
+
+.canvas-container {
+    margin-left: 7em;
+    margin-top: 3em;
+}
+
+.ui-element {
+    color: white;
+    background-color: grey;
+}
+
+#sidebar__toolbar {
+    /* position: fixed; */
+    padding: 0.5em;
+    width: fit-content;
+    height: fit-content;
+    position: fixed;
+    top: 1em;
+    left: 1em;
+    
+    box-shadow: 5px 5px 5px #ddd;
+    
+    border-radius: 0.25em;
+    text-align: center;
+}
+
+#properties-panel i {
+    display: inline-block;
+    margin-right: 0.25em;
+}
+
+.sidebar__tool i {
+    margin: auto;
+}
+
+.sidebar__tool {
+    margin: 0.25em auto 0.25em;
+    display: block;
+    border: none;
+    border-radius: 0.25em;
+    background-color: lightgray;
+    width: 32px;
+    height: 32px;
+}
+
+button:hover {
+    background-color: white;
+}
+
+#canvas {
+    background-color: white;
+    box-shadow: 5px 5px 10px rgb(161, 161, 161);
+}
+
+#properties-panel {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    padding: 1em;
+    width: fit-content;
+    position: fixed;
+    z-index: 1;
+}
+
+#properties__active-tool {
+    border: 1px solid red;
+}
+
+input[type=number] {
+    width: 3em;
+    border-radius: 0.5em;
+    border-style: none;
+}

@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="stitchboard.css">
+    <link href="https://css.gg/css?=|crop|undo|redo|edit-markup|shape-square|shape-circle|shape-triangle|arrows-h-alt|arrows-v-alt|arrows-shrink-h|arrows-shrink-v\arrows-exchange-alt|sync" rel="stylesheet">
+    <title>Stitchboard — Trevor Sweet</title>
+</head>
+<body>
+
+    <div id="sidebar__toolbar" class="ui-element">
+        <h6 style="margin: 0.5em 0">TOOLS</h6>
+        <button id="select" class="sidebar__tool"><i class="gg-crop"></i></button>
+        <button id="brush" class="sidebar__tool">
+            <i class="gg-edit-markup"></i>
+        </button>
+        <button id="rectangle" class="sidebar__tool">
+            <i class="gg-shape-square"></i>
+        </button>
+        <button id="ellipse" class="sidebar__tool">
+            <i class="gg-shape-circle"></i>
+        </button>
+        <button id="triangle" class="sidebar__tool">
+            <i class="gg-shape-triangle"></i>
+        </button>
+        <hr>
+        <input class="sidebar__tool" type="color" name="Fill color" id="fillColor">
+        <button id="undo" class="sidebar__tool"><i class="gg-undo"></i></button>
+        <button id="redo" class="sidebar__tool"><i class="gg-redo"></i></button>
+    </div>
+
+    <div id="properties-panel" class="ui-element">
+        <p>Properties</p>
+        <hr>
+        <form name="pivotWidget" action="" method="post">
+            <h6>PIVOT</h6>
+            <table>
+                <tr>
+                    <td><input type="radio" name="pivot" value="top-left"></td>
+                    <td><input type="radio" name="pivot" value="top-center"></td>
+                    <td><input type="radio" name="pivot" value="top-right"></td>
+                </tr>
+                <tr>
+                    <td><input type="radio" name="pivot" value="center-left"></td>
+                    <td><input type="radio" name="pivot" value="center-center" checked></td>
+                    <td><input type="radio" name="pivot" value="center-right"></td>
+                </tr>
+                <tr>
+                    <td><input type="radio" name="pivot" value="bottom-left"></td>
+                    <td><input type="radio" name="pivot" value="bottom-center"></td>
+                    <td><input type="radio" name="pivot" value="bottom-right"></td>
+                </tr>
+            </table>
+        </form>
+        <h6>TRANSFORM</h6>
+        <table>
+            <colgroup>
+                <col span = "1" style="width: 15%;">
+                <col span = "1" style="width: 35%">
+                <col span = "1" style="width: 15%;">
+                <col span = "1" style="width: 35%">
+            </colgroup>
+
+            <tbody>
+                <tr>
+                    <td><i class="gg-arrows-h-alt"></i></td>
+                    <td><input type="number" name="X-Position" id="xPosition"></td>
+
+                    <td><i class="gg-arrows-v-alt"></i></td>
+                    <td><input type="number" name="Y-Position" id="yPosition"></td>
+                </tr>
+                <tr>
+                    <td><i class="gg-arrows-shrink-h"></i></td>
+                    <td><input type="number" name="width" id="width"></td>
+
+                    <td><i class="gg-arrows-shrink-v"></i></td>
+                    <td><input type="number" name="height" id="height"></td>
+                </tr>
+                <tr>
+                    <td><i class="gg-sync"></i></td>
+                    <td><input type="number" name="Rotation" id="rotation" max="360" min="-360"></td>
+
+                    <td><i class="gg-arrows-exchange-alt"></i></td>
+                    <td><input type="number" name="Skew" id="skew"></td>
+                </tr>
+            </tbody>
+        </table>
+        <div id="properties__select"></div>
+        <div id="properties__brush">
+            <div>
+                <h6>BRUSH</h6>
+                <input type="number" name="Brush size" id="properties__brush__size" value="1" min="1"><label for=""> Brush size</label>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="canvas" width="1024" height="768">Your browser doesn't support HTML5!</canvas>
+    <script type="text/javascript" src="fabric.min.js"></script>
+    <script>
+
+        /* All credit goes to Alim Özdemir for undo/redo handling (for whatever reason putting this its own script tag didn't work, am still JS noob)
+           https://github.com/lyzerk/fabric-history */
+        fabric.Canvas.prototype.initialize=function(t){return function(...i){return t.call(this,...i),this._historyInit(),this}}(fabric.Canvas.prototype.initialize),fabric.Canvas.prototype.dispose=function(t){return function(...i){return t.call(this,...i),this._historyDispose(),this}}(fabric.Canvas.prototype.dispose),fabric.Canvas.prototype._historyNext=function(){return JSON.stringify(this.toDatalessJSON(this.extraProps))},fabric.Canvas.prototype._historyEvents=function(){return{"object:added":this._historySaveAction,"object:removed":this._historySaveAction,"object:modified":this._historySaveAction,"object:skewing":this._historySaveAction}},fabric.Canvas.prototype._historyInit=function(){this.historyUndo=[],this.historyRedo=[],this.extraProps=["selectable"],this.historyNextState=this._historyNext(),this.on(this._historyEvents())},fabric.Canvas.prototype._historyDispose=function(){this.off(this._historyEvents())},fabric.Canvas.prototype._historySaveAction=function(){if(this.historyProcessing)return;const t=this.historyNextState;this.historyUndo.push(t),this.historyNextState=this._historyNext(),this.fire("history:append",{json:t})},fabric.Canvas.prototype.undo=function(t){this.historyProcessing=!0;const i=this.historyUndo.pop();i?(this.historyRedo.push(this._historyNext()),this.historyNextState=i,this._loadHistory(i,"history:undo",t)):this.historyProcessing=!1},fabric.Canvas.prototype.redo=function(t){this.historyProcessing=!0;const i=this.historyRedo.pop();i?(this.historyUndo.push(this._historyNext()),this.historyNextState=i,this._loadHistory(i,"history:redo",t)):this.historyProcessing=!1},fabric.Canvas.prototype._loadHistory=function(t,i,s){var o=this;this.loadFromJSON(t,function(){o.renderAll(),o.fire(i),o.historyProcessing=!1,s&&"function"==typeof s&&s()})},fabric.Canvas.prototype.clearHistory=function(){this.historyUndo=[],this.historyRedo=[],this.fire("history:clear")},fabric.Canvas.prototype.offHistory=function(){this.historyProcessing=!0},fabric.Canvas.prototype.onHistory=function(){this.historyProcessing=!1,this._historySaveAction()};
+
+        const canvas = new fabric.Canvas('canvas');
+
+        const $ = function(id){ return document.getElementById(id) };
+
+        var shiftMode = false;
+        
+        /* toolbar inputs */
+
+        const selectButton      = $("select");
+        const brushButton       = $("brush");
+        const rectangleButton   = $("rectangle");
+        const ellipseButton     = $("ellipse");
+        const triangleButton    = $("triangle");
+
+        const fillColor         = $("fillColor");
+        const undoButton        = $("undo");
+        const redoButton        = $("redo");
+
+        /* panel inputs */
+        
+        const xPosition   = $("xPosition");
+        const yPosition   = $("yPosition");
+        const width       = $("width");
+        const height      = $("height");
+        const rotation    = $("rotation");
+        const skew        = $("skew");
+
+        const brushSize   = $("properties__brush__size");
+        const pivotTable  = document.pivotWidget.pivot;
+        
+
+        /* let me clarify, I know there's a better way to change the color of
+           each button in a much more efficient way, but I just can't be asked
+           to change it at this point. This whole thing feels like a cobbled-
+           together mess.
+        */
+
+        function select() {
+            selectButton.style.background = "yellow";
+            brushButton.style.background = "lightgray";
+            rectangleButton.style.background = "lightgray";
+            ellipseButton.style.background = "lightgray";
+            triangleButton.style.background = "lightgray";
+
+            canvas.isDrawingMode = false;
+        }
+        
+        function brush() {
+            brushButton.style.background = "yellow";
+            selectButton.style.background = "lightgray";
+            rectangleButton.style.background = "lightgray";
+            ellipseButton.style.background = "lightgray";
+            triangleButton.style.background = "lightgray";
+
+            canvas.isDrawingMode = true;
+        }
+
+        function rectangle() {
+            rectangleButton.style.background = "yellow";
+            selectButton.style.background = "lightgray";
+            brushButton.style.background = "lightgray";
+            ellipseButton.style.background = "lightgray";
+            triangleButton.style.background = "lightgray";
+            
+            canvas.isDrawingMode = false;
+            var rectangle = new fabric.Rect({
+                width: 50, height: 50, fill: fillColor.value, left: 50, top: 50
+            });
+            canvas.add(rectangle);
+        }
+
+        function ellipse() {
+            ellipseButton.style.background = "yellow";
+            selectButton.style.background = "lightgray";
+            brushButton.style.background = "lightgray";
+            rectangleButton.style.background = "lightgray";
+            triangleButton.style.background = "lightgray";
+
+            canvas.isDrawingMode = false;
+            var ellipse = new fabric.Ellipse({
+                rx: 50, ry: 50, fill: fillColor.value, left: 50, top: 50
+            });
+            canvas.add(ellipse);
+        }
+
+        function triangle() {
+            triangleButton.style.background = "yellow";
+            selectButton.style.background = "lightgray";
+            brushButton.style.background = "lightgray";
+            rectangleButton.style.background = "lightgray";
+            ellipseButton.style.background = "lightgray";
+
+            canvas.isDrawingMode = false;
+            var triangle = new fabric.Triangle({
+                width: 50, height: 50, fill: fillColor.value, left: 50, top: 50
+            });
+            canvas.add(triangle);
+        }
+
+        function updateTransform() {
+            var activeObject = canvas.getActiveObject();
+
+            if (shiftMode) {
+                activeObject.snapAngle = 15;
+            } else {
+                activeObject.snapAngle = 0;
+            }
+
+            xPosition.value = activeObject.left;
+            yPosition.value = activeObject.top;
+            width.value     = activeObject.scaleX;
+            height.value    = activeObject.scaleY;
+            rotation.value  = activeObject.angle;
+            skew.value      = activeObject.skewX;
+        }
+
+        function resetPivot() {
+            object = canvas.getActiveObject();
+            object.centeredRotation = true;
+            for (i = 0; i < pivotTable.length; i++) {
+                if (pivotTable[i].value == "center-center") {
+                    pivotTable[i].checked = true;
+                } else {
+                    pivotTable[i].checked = false;
+                }
+            }
+        }
+
+        /* canvas event handling */
+
+        canvas.on({
+            "object:moving": updateTransform,
+            "object:scaling": updateTransform,
+            "object:resizing": updateTransform,
+            "object:rotating": updateTransform,
+            "object:skewing": updateTransform,
+            "selection:created": updateTransform
+        });
+
+        canvas.on("before:selection:cleared", resetPivot); 
+
+        /* toolbar event handling */
+
+        selectButton.onclick    = function() { select(); }
+        brushButton.onclick     = function() { brush(); }
+        rectangleButton.onclick = function() { rectangle(); }
+        ellipseButton.onclick   = function() { ellipse(); }
+        triangleButton.onclick  = function() { triangle(); }
+
+        fillColor.oninput = function() {
+            canvas.freeDrawingBrush.color = this.value;
+            canvas.getActiveObject().stroke = this.value;
+        }
+
+        undoButton.onclick = function() { canvas.undo(); }
+        redoButton.onclick = function() { canvas.redo(); }
+
+        /* panel event handling */
+
+        xPosition.oninput = function() {
+            canvas.getActiveObject().left = parseInt(this.value, 10);
+            canvas.requestRenderAll();
+        }
+
+        yPosition.oninput = function() {
+            canvas.getActiveObject().top = parseInt(this.value, 10);
+            canvas.requestRenderAll();
+        }
+        
+        width.oninput = function() {
+            canvas.getActiveObject().scaleX = parseInt(this.value, 10);
+            canvas.requestRenderAll();
+        }
+
+        height.oninput = function() {
+            canvas.getActiveObject().scaleY = parseInt(this.value, 10);
+            canvas.requestRenderAll();
+        }
+
+        rotation.oninput = function() {
+            canvas.getActiveObject().angle = parseInt(this.value, 10);
+            canvas.requestRenderAll();
+        }
+
+        skew.oninput = function() {
+            canvas.getActiveObject().skewX = parseInt(this.value, 10);
+            canvas.requestRenderAll();
+        }
+
+
+        brushSize.onchange = function() {
+            canvas.freeDrawingBrush.width = parseInt(this.value, 10);
+        }
+
+        for (i = 0; i < pivotTable.length; i++) {
+            pivotTable[i].onclick = function() {
+                pivot = this.value;
+                object = canvas.getActiveObject();
+                object.centeredRotation = false;
+
+                if (pivot == "top-left" || pivot == "center-left" || pivot == "bottom-left") {
+                    object.originX = "left";
+                } else if (pivot == "top-center" || pivot == "center-center" || pivot == "bottom-center") {
+                    object.originX = "center";
+                } else if (pivot == "top-right" || pivot == "center-right" || pivot == "bottom-right") {
+                    object.originX = "right";
+                }
+
+                if (pivot == "top-left" || pivot == "top-center" || pivot == "top-right") {
+                    object.originY = "top";
+                } else if (pivot == "center-left" || pivot == "center-center" || pivot == "center-right") {
+                    object.originY = "center";
+                } else if (pivot == "bottom-left" || pivot == "bottom-center" || pivot == "bottom-right") {
+                    object.originY = "bottom";
+                }
+                    
+            }
+        }
+        
+        // key shortcuts
+        document.addEventListener("keydown", function(event) {
+
+            switch (event.key) {
+
+                // select tool
+                case "1":
+                    select();
+                    break;
+
+                // brush tool
+                case "2":
+                    brush();
+                    break;
+
+                // rectangle tool
+                case "3":
+                    rectangle();
+                    break;
+
+                // ellipse tool
+                case "4":
+                    ellipse();
+                    break;
+
+                // triangle tool
+                case "5":
+                    triangle();
+                    break;
+
+                // increase brush size
+                case "]":
+                    canvas.freeDrawingBrush.width += 1;
+                    brushSize.value = canvas.freeDrawingBrush.width;
+                    break;
+
+                // decrease brush size
+                case "[":
+                    if (canvas.freeDrawingBrush.width > 1) {
+                        canvas.freeDrawingBrush.width -= 1;
+                        brushSize.value = canvas.freeDrawingBrush.width;
+                    }
+                    break;
+
+                // delete
+                case "Delete":
+                case "Backspace":
+                    var activeObjects = canvas.getActiveObjects();
+                    canvas.discardActiveObject();
+                    canvas.remove(...activeObjects);
+                    canvas.renderAll();
+                    break;
+
+                case "Shift":
+                    shiftMode = true;
+                    break;
+                    
+                case "z":
+                    canvas.undo();
+                    break;
+
+                case "x":
+                    canvas.redo();
+                    break;
+
+                default:
+                    break;
+
+            }
+        });
+
+        document.addEventListener("keyup", function(event) {
+            switch(event.key) {
+
+                case "Shift":
+                    shiftMode = false;
+                    break;
+                
+                default:
+                    break;
+            }
+        });
+
+    </script>
+</body>
+</html>
