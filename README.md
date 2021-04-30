@@ -1,6 +1,8 @@
 # stitchboard
 Stitchboard is a web-based vector graphic art application built with Fabric.js.
 
+[Click here to start drawing!](http://35.231.135.49/index/project/stitchboard/stitchboard.html)
+
 ![image](https://user-images.githubusercontent.com/45302428/116645872-ba18f480-a944-11eb-93c3-1418424b736b.png)
 
 *This was a project created for my Computer Graphics course at Grand Valley State University Winter 2021.*
